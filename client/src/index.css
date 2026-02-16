@@ -9,3 +9,24 @@ html::-webkit-scrollbar {
 html {
   scroll-behavior: smooth;
 }
+
+
+.shimmer {
+  background: linear-gradient(
+    110deg,
+    #e5e7eb 40%,
+    #f3f4f6 50%,
+    #e5e7eb 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

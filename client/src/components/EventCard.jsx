@@ -19,6 +19,7 @@ const EventCard = ({ event }) => {
   const { formattedDate, time } = formatDate(date);
   const {
     loading,
+    loadingEvents,
     categorizeEvent,
     registerForEvent,
     isEventRegistered,
@@ -49,7 +50,7 @@ const EventCard = ({ event }) => {
           "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200",
       };
 
-    if (loading)
+    if (loadingEvents[eventId])
       return {
         text: "Processing...",
         disabled: true,

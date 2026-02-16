@@ -7,7 +7,7 @@ import Event from "../models/event.model.js";
  */
 export const getEvents = async (req, res) => {
   try {
-    const { search_q, date, location, category, page, limit = 10 } = req.query;
+    const { search_q, date, location, category, page = 1, limit = 10 } = req.query;
 
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);
@@ -33,7 +33,7 @@ export const getEvents = async (req, res) => {
     const totalEvents = await Event.countDocuments(query);
 
     const events = await Event.find(query)
-      .sort({ date: 1 })
+      .sort({ createdAt: -1 })
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber);
 

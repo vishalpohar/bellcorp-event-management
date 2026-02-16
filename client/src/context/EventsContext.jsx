@@ -10,6 +10,7 @@ export const EventProvider = ({ children }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [myRegistrations, setMyRegistrations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
 
@@ -55,7 +56,7 @@ export const EventProvider = ({ children }) => {
   };
 
   const registerForEvent = async ({ eventId }) => {
-    setLoading(true);
+    setLoadingEvents((prev) => ({ ...prev, [eventId]: true }));
     try {
       const res = await axios.post(`/event-registrations/${eventId}`);
       toast.success(res.data.message || "Registered Successfully");
@@ -74,24 +75,21 @@ export const EventProvider = ({ children }) => {
     } catch (error) {
       toast.error(error.response.data.message || "An error occurred");
     } finally {
-      setLoading(false);
+      setLoadingEvents((prev) => ({ ...prev, [eventId]: false }));
     }
   };
 
   const getMyRegistrations = async () => {
-    setLoading(true);
     try {
       const res = await axios.get("/event-registrations");
       setMyRegistrations(res.data);
     } catch (error) {
       toast.error(error.response.data.message || "An error occurred");
-    } finally {
-      setLoading(false);
     }
   };
 
   const cancelEvent = async ({ eventId }) => {
-    setLoading(true);
+    setLoadingEvents((prev) => ({ ...prev, [eventId]: true }));
     try {
       const res = await axios.delete(`/event-registrations/${eventId}`);
       toast.success(res.data.message);
@@ -110,7 +108,7 @@ export const EventProvider = ({ children }) => {
     } catch (error) {
       toast.error(error.response.data.message || "An error occurred");
     } finally {
-      setLoading(false);
+      setLoadingEvents((prev) => ({ ...prev, [eventId]: false }));
     }
   };
 
@@ -123,12 +121,13 @@ export const EventProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchEvents = async (retries = 2) => {
       setLoading(true);
       resetStates();
       try {
         const res = await axios.get("/events?page=1");
         const eventsData = res.data.events;
+
         setEvents(eventsData);
         setTotalPages(res.data.totalPages);
 
@@ -141,10 +140,18 @@ export const EventProvider = ({ children }) => {
           ...new Set(eventsData.map((event) => event.location)),
         ];
         setLocations(uniqueLocations);
+
         const token = localStorage.getItem("token");
         if (token) await getMyRegistrations();
       } catch (error) {
-        toast.error(error.response.data.message || "An error occurred");
+        if (retries > 0) {
+          setTimeout(() => fetchEvents(retries - 1), 10000);
+        } else {
+          toast.error(
+            "Server is taking longer than expected. Please refresh after a few seconds.",
+            { id: "server-error" },
+          );
+        }
       } finally {
         setLoading(false);
       }
@@ -159,6 +166,7 @@ export const EventProvider = ({ children }) => {
         events,
         totalPages,
         loading,
+        loadingEvents,
         categories,
         locations,
         myRegistrations,

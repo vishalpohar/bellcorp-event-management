@@ -3,6 +3,7 @@ import { useEvent } from "../context/EventsContext";
 import EventCard from "../components/EventCard";
 import { ArrowDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState(undefined);
@@ -10,6 +11,7 @@ const HomePage = () => {
   const [selectedTab, setSelectedTab] = useState("All Events");
   const [page, setPage] = useState(1);
   const { user } = useAuth();
+  const { loading } = useEvent();
 
   const { events, totalPages, categories, locations, filterEvents } =
     useEvent();
@@ -33,19 +35,6 @@ const HomePage = () => {
       page,
     });
   };
-
-  useEffect(() => {
-    setSelectedCategory(undefined);
-    setSelectedLocation(undefined);
-    setSelectedTab("All Events");
-    setPage(1);
-
-    const fetchData = async () => {
-      await filterEvents({ page: 1 });
-    };
-
-    fetchData();
-  }, [user]);
 
   const loadMoreEvents = () => {
     const nextPage = page + 1;
@@ -139,27 +128,35 @@ const HomePage = () => {
         </div>
       </div>
 
-      {filteredByTab.length > 0 ? (
-        <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredByTab.map((event) => (
-              <EventCard key={event._id} event={event} />
-            ))}
-          </div>
-          {page < totalPages && (
-            <div className="flex justify-center items-center animate-bounce duration-200 mt-8">
-              <button
-                type="button"
-                className="bg-black/10 border-2 border-gray-300 p-2 rounded-full"
-                onClick={loadMoreEvents}>
-                <ArrowDown />
-              </button>
+      {!loading ? (
+        filteredByTab.length > 0 ? (
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredByTab.map((event) => (
+                <EventCard key={event._id} event={event} />
+              ))}
             </div>
-          )}
-        </div>
+            {page < totalPages && (
+              <div className="flex justify-center items-center animate-bounce duration-200 mt-8">
+                <button
+                  type="button"
+                  className="bg-black/10 border-2 border-gray-300 p-2 rounded-full"
+                  onClick={loadMoreEvents}>
+                  <ArrowDown />
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex justify-center items-center mt-10">
+            <p className="text-gray-700 text-lg">No Events Found</p>
+          </div>
+        )
       ) : (
-        <div className="flex justify-center items-center mt-10">
-          <p className="text-gray-700 text-lg">No Events Found</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <SkeletonLoader key={index} />
+          ))}
         </div>
       )}
     </div>
