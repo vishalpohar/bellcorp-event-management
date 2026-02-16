@@ -10,7 +10,6 @@ const HomePage = () => {
   const [selectedLocation, setSelectedLocation] = useState(undefined);
   const [selectedTab, setSelectedTab] = useState("All Events");
   const [page, setPage] = useState(1);
-  const { user } = useAuth();
   const { loading } = useEvent();
 
   const { events, totalPages, categories, locations, filterEvents } =
