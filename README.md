@@ -55,7 +55,7 @@ A **full-stack event management application** built with the **MERN stack** (Mon
 ### Backend Setup
 1. Clone the repository
    ```bash
-   git clone https://github.com/your-username/bellcorp-event-management.git
+   git clone https://github.com/vishalpohar/bellcorp-event-management.git
 
 2. Navigate to backend folder
     cd server
