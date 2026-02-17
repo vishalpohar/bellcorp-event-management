@@ -22,17 +22,17 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
     if (!validatePassword.test(password)) {
       return res.status(400).json({
         message:
           "Password must be 8+ characters, include uppercase, lowercase, number and special character",
       });
-    }
-
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
