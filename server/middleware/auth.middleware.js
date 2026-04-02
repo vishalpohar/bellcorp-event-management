@@ -4,32 +4,27 @@ import jwt from "jsonwebtoken";
 // Verify user access
 export const protectRoute = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const accessToken = req.cookies.accessToken;
 
-    if (!authHeader || !authHeader.startsWith("Bearer "))
+    if (!accessToken)
       return res
         .status(401)
         .json({ message: "Unauthorized - No access token provided" });
 
-    const accessToken = authHeader.split(" ")[1];
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select("-password");
 
-    try {
-      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.userId).select("-password");
+    if (!user) return res.status(400).json({ message: "User not found" });
 
-      if (!user) return res.status(400).json({ message: "User not found" });
+    req.user = user;
 
-      req.user = user;
-
-      next();
-    } catch (error) {
-      if ((error.name = "TokenExpiredError"))
-        return res
-          .status(401)
-          .json({ message: "Unauthorized - Access token expired" });
-      throw error;
-    }
+    next();
   } catch (error) {
+    if ((error.name = "TokenExpiredError"))
+      return res
+        .status(401)
+        .json({ message: "Unauthorized - Access token expired" });
+
     console.log("Error in protectRoute middleware", error);
     res.status(500).json({ message: error.message });
   }

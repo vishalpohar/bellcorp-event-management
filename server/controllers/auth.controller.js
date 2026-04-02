@@ -22,12 +22,16 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
+    console.log("email validation done");
+
     if (!validatePassword.test(password)) {
+      console.log("password validation failed");
       return res.status(400).json({
         message:
           "Password must be 8+ characters, include uppercase, lowercase, number and special character",
       });
     }
+    console.log("password validation done");
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
 
@@ -76,16 +80,34 @@ export const loginUser = async (req, res) => {
       userId: user._id,
     };
 
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: "1d"});
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
     const userData = { name: user.name, email: user.email };
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     res.json({
       message: "Login successful",
       user: userData,
-      token: accessToken,
     });
   } catch (error) {
     console.log("Error occurred while login", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("accessToken");
+    res.json({ message: "You have been logged out successfully!" });
+  } catch (error) {
+    console.log("Error occurred while logging out", error);
     res.status(500).json({ message: error.message });
   }
 };

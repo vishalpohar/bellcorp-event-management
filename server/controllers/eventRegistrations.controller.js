@@ -25,7 +25,7 @@ export const createEventRegistration = async (req, res) => {
     const updatedEvent = await Event.findOneAndUpdate(
       { _id: eventId, availableSeats: { $gt: 0 } },
       { $inc: { availableSeats: -1 } },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     if (!updatedEvent)
@@ -33,12 +33,10 @@ export const createEventRegistration = async (req, res) => {
 
     await Registration.create({ userId, eventId });
 
-    res
-      .status(201)
-      .json({
-        message: "Successfully registered for the event",
-        event: updatedEvent,
-      });
+    res.status(201).json({
+      message: "Successfully registered for the event",
+      event: updatedEvent,
+    });
   } catch (error) {
     console.log("Error occurred while register for event", error);
     res.status(500).json({ message: error.message });
@@ -64,7 +62,7 @@ export const cancelEventRegistration = async (req, res) => {
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
       { $inc: { availableSeats: 1 } },
-      { new: true },
+      { returnDocument: "after" },
     );
 
     res.json({ message: "Event cancelled Successfully", event: updatedEvent });

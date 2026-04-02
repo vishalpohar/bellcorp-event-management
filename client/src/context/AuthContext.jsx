@@ -6,19 +6,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
-    }
-    setLoading(false);
-  }, []);
 
   const register = async ({ username, email, password }) => {
     setLoading(true);
@@ -42,11 +30,9 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await axios.post("/auth/login", { email, password });
-      const { user, token } = res.data;
+      const { user } = res.data;
       setUser(user);
-      setToken(token);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
       return true;
     } catch (error) {
       toast.error(error.response.data.message || "An error occurred");
@@ -56,17 +42,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const res = await axios.post("/auth/logout");
     setUser(null);
-    setToken(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    toast.success("You have been logged out");
+    toast.success(res.data.message || "You have been logged out", {
+      id: "auth",
+    });
   };
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response.status === 401) {
+          setUser(null);
+        }
+        return Promise.reject(error);
+      },
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  });
+
   return (
-    <AuthContext.Provider
-      value={{ user, token, loading, register, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

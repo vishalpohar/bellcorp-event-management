@@ -17,7 +17,7 @@ const RegisterPage = () => {
     e.preventDefault();
     setError("");
     console.log(email, password);
-    if (email === "" || password === "") {
+    if (!username || !email || !password) {
       return setError("All fields are required");
     }
     const success = await register({ username, email, password });

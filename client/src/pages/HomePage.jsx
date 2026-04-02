@@ -16,14 +16,13 @@ const HomePage = () => {
     useEvent();
 
   const handleCategoryChange = (event) => {
-    const category =
-      event.target.value === "undefined" ? null : event.target.value;
+    const category = event.target.value;
     setSelectedCategory(category);
+    console.log(event.target.value);
   };
 
   const handleLocationChange = (event) => {
-    const location =
-      event.target.value === "undefined" ? null : event.target.value;
+    const location = event.target.value;
     setSelectedLocation(location);
   };
 
@@ -74,7 +73,7 @@ const HomePage = () => {
             value={selectedLocation}
             className="h-10 w-40 px-2 bg-white text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 overflow-y-auto"
             onChange={handleLocationChange}>
-            <option value="undefined">Location</option>
+            <option value="">Location</option>
             {locations.map((location, idx) => (
               <option key={idx} value={location}>
                 {location}
@@ -85,7 +84,7 @@ const HomePage = () => {
             value={selectedCategory}
             className="h-10 w-40 px-2 bg-white text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 overflow-y-auto"
             onChange={handleCategoryChange}>
-            <option value="undefined">Category</option>
+            <option value="">Category</option>
             {categories.map((category, idx) => (
               <option key={idx} value={category}>
                 {category}

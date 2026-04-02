@@ -15,7 +15,6 @@ const LoginPage = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    console.log(email, password);
     if (email === "" || password === "") {
       return setError("All fields are required");
     }
