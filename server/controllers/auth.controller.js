@@ -22,15 +22,11 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-<<<<<<< HEAD
-    console.log("email validation done");
-=======
     const existingUser = await User.findOne({ email: email.toLowerCase() });
 
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
->>>>>>> d3063f5c11e2f35bfe2a70c1cabc41279fee7fbf
 
     if (!validatePassword.test(password)) {
       console.log("password validation failed");
